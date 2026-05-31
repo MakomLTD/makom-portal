@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>פורטל פרויקטים | MAKOM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --navy: #11193F;
+      --yellow: #FCB127;
+      --green: #2FB66D;
+      --red: #E05A47;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Noto Sans Hebrew', sans-serif;
+      background: #f4f6fb;
+      color: #1a1a2e;
+      direction: rtl;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--navy);
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 12px rgba(0,0,0,.18);
+    }
+    .logo-svg { display: block; }
+    .header-info { text-align: left; }
+    .hdr-client { color: var(--yellow); font-weight: 700; font-size: 1rem; }
+    .hdr-ts { color: rgba(255,255,255,.55); font-size: .78rem; margin-top: 2px; }
+
+    /* ── Demo banner ── */
+    .demo-banner {
+      background: #fff8e1;
+      border-bottom: 3px solid var(--yellow);
+      padding: 10px 32px;
+      text-align: center;
+      font-weight: 600;
+      color: #7a5800;
+      font-size: .88rem;
+      display: none;
+    }
+    .demo-banner.show { display: block; }
+
+    main { max-width: 1300px; margin: 0 auto; padding: 28px 20px 52px; }
+
+    /* ── Map ── */
+    #mapWrap { display: none; margin-bottom: 28px; }
+    #map { height: 300px; border-radius: 16px; box-shadow: 0 4px 20px rgba(17,25,63,.12); }
+
+    /* ── Stats bar ── */
+    .stats-bar { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 24px; }
+    .stat-chip {
+      background: #fff;
+      border-radius: 12px;
+      padding: 10px 18px;
+      box-shadow: 0 2px 10px rgba(17,25,63,.07);
+      font-size: .84rem;
+      color: #666;
+    }
+    .stat-chip strong { color: var(--navy); font-size: 1.1rem; margin-left: 4px; }
+
+    /* ── Cards ── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+    }
+    @media (max-width: 960px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 620px) { .cards-grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(17,25,63,.09);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform .2s ease, box-shadow .2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 10px 32px rgba(17,25,63,.15); }
+
+    .card-thumb {
+      height: 185px;
+      background: linear-gradient(135deg, #11193F 0%, #1e2f6b 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .card-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .thumb-placeholder { opacity: .22; }
+
+    .card-body { padding: 18px 18px 12px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+
+    .badges { display: flex; gap: 6px; flex-wrap: wrap; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 11px;
+      border-radius: 20px;
+      font-size: .73rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .b-status { background: #e7f0ff; color: #1a4fa0; }
+    .b-risk-low  { background: #d2f5e5; color: #1a6640; }
+    .b-risk-med  { background: #fff4d9; color: #8a6200; }
+    .b-risk-high { background: #fde8e5; color: #991f12; }
+
+    .card-title { font-size: 1.05rem; font-weight: 700; color: var(--navy); line-height: 1.4; }
+    .card-loc { font-size: .81rem; color: #888; }
+
+    .prog-label { display: flex; justify-content: space-between; font-size: .77rem; color: #888; margin-bottom: 4px; }
+    .prog-bg { background: #eef0f6; border-radius: 8px; height: 8px; overflow: hidden; }
+    .prog-fill { height: 100%; border-radius: 8px; background: var(--green); }
+
+    .cdown { font-size: .81rem; color: #666; }
+    .cdown b { color: var(--navy); }
+    .cdown.late b { color: var(--red); }
+
+    .card-foot { padding: 0 18px 18px; }
+    .btn-site {
+      display: block;
+      width: 100%;
+      padding: 10px 16px;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: .88rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: background .15s;
+    }
+    .btn-site:hover { background: #1b2c7a; }
+
+    /* ── Empty / Loading ── */
+    .empty, .loading {
+      text-align: center;
+      padding: 72px 24px;
+    }
+    .empty h2 { font-size: 1.4rem; color: var(--navy); margin-bottom: 8px; }
+    .empty p  { color: #888; }
+    .spin {
+      width: 44px; height: 44px;
+      border: 4px solid #dde1ee;
+      border-top-color: var(--navy);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading p { color: var(--navy); font-weight: 500; }
+
+    /* ── Dialog overlay ── */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(17,25,63,.55);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      backdrop-filter: blur(2px);
+    }
+    .overlay.open { display: flex; }
+    .dlg {
+      background: #fff;
+      border-radius: 20px;
+      max-width: 580px;
+      width: 100%;
+      max-height: 88vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(0,0,0,.26);
+    }
+    .dlg-head {
+      background: var(--navy);
+      color: #fff;
+      padding: 18px 22px;
+      border-radius: 20px 20px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+    }
+    .dlg-head h2 { font-size: 1.1rem; }
+    .dlg-close {
+      background: rgba(255,255,255,.15);
+      border: none;
+      color: #fff;
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .dlg-close:hover { background: rgba(255,255,255,.25); }
+    .dlg-body { padding: 22px; }
+    .dlg-img { width: 100%; height: 210px; object-fit: cover; border-radius: 12px; margin-bottom: 16px; }
+    .dlg-desc { font-size: .9rem; color: #555; line-height: 1.7; margin-bottom: 14px; }
+    .dlg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+    .dlg-field label { font-size: .72rem; color: #aaa; display: block; margin-bottom: 3px; text-transform: uppercase; letter-spacing: .04em; }
+    .dlg-field p { font-size: .9rem; color: var(--navy); font-weight: 500; }
+    .dlg-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+    .btn-yt { background: #c00 !important; }
+    .btn-yt:hover { background: #a00 !important; }
+
+    footer { text-align: center; padding: 20px; color: #bbb; font-size: .77rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <svg class="logo-svg" width="170" height="50" viewBox="0 0 420 150" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="100.11 116.51 127.29 146.01 154.47 116.51 154.47 79.1 100.11 79.1 100.11 116.51" fill="#FCB127"/>
+    <path d="m67.2,79.1V20.18l-23.92,58.92h-5.83L13.65,20.18v58.92H0V1.28h19.25l21.12,52.38L61.6,1.28h19.25v77.82h-13.65Z" fill="#fff"/>
+    <path d="m222.48,79.1l-26.13-32.78-6.77,7.93v24.85h-13.65V1.28h13.65v37.1L220.03,1.28h16.92l-31.62,36.75,33.95,41.07h-16.8Z" fill="#fff"/>
+    <path d="m280,0c23.33,0,39.78,17.03,39.78,40.25s-16.45,40.25-39.78,40.25-39.78-17.03-39.78-40.25S256.67,0,280,0Zm0,12.13c-15.75,0-25.78,12.02-25.78,28.12s10.03,28.12,25.78,28.12,25.78-12.13,25.78-28.12-10.15-28.12-25.78-28.12Z" fill="#fff"/>
+    <path d="m400.17,79.1V20.18l-23.92,58.92h-5.83l-23.8-58.92v58.92h-13.65V1.28h19.25l21.12,52.38L394.57,1.28h19.25v77.82h-13.65Z" fill="#fff"/>
+    <path d="m136.51,1.28h-17.03l-30.57,77.82h14.94s18.29,0,18.29,0v12.35h11.71v-12.35h33.23S136.51,1.28,136.51,1.28Zm-28.05,65.13l19.53-53.58,19.53,53.58h-39.06Z" fill="#fff"/>
+  </svg>
+  <div class="header-info">
+    <div class="hdr-client" id="hdrClient">פורטל פרויקטים</div>
+    <div class="hdr-ts" id="hdrTs"></div>
+  </div>
+</header>
+
+<div class="demo-banner" id="demoBanner">
+  ⚠️ מוצגים נתוני הדגמה — הוסיפו ?csv=URL&amp;client=ID לכתובת
+</div>
+
+<main>
+  <div id="loadingEl" class="loading">
+    <div class="spin"></div>
+    <p>טוען נתוני פרויקטים...</p>
+  </div>
+
+  <div id="mapWrap">
+    <div id="map"></div>
+  </div>
+
+  <div id="statsBar" class="stats-bar" style="display:none"></div>
+
+  <div id="cardsWrap" style="display:none">
+    <div class="cards-grid" id="cardsGrid"></div>
+  </div>
+
+  <div id="emptyEl" class="empty" style="display:none">
+    <h2>לא נמצאו פרויקטים</h2>
+    <p>לא נמצאו פרויקטים פעילים עבור הלקוח המבוקש.</p>
+  </div>
+</main>
+
+<div class="overlay" id="overlay">
+  <div class="dlg">
+    <div class="dlg-head">
+      <h2 id="dlgTitle"></h2>
+      <button class="dlg-close" id="dlgClose">&#x2715;</button>
+    </div>
+    <div class="dlg-body" id="dlgBody"></div>
+  </div>
+</div>
+
+<footer>
+  <span id="footerTs"></span> | פורטל לקוחות MAKOM LTD
+</footer>
+
+<script>
+'use strict';
+
+// ── CSV parser ────────────────────────────────────────────────────────────────
+function parseCSV(text) {
+  const rows = [];
+  let row = [], cell = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQ) {
+      if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+      else if (c === '"') inQ = false;
+      else cell += c;
+    } else {
+      if (c === '"')  { inQ = true; }
+      else if (c === ',') { row.push(cell.trim()); cell = ''; }
+      else if (c === '\n' || c === '\r') {
+        if (c === '\r' && text[i + 1] === '\n') i++;
+        row.push(cell.trim()); cell = '';
+        if (row.some(Boolean)) rows.push(row);
+        row = [];
+      } else cell += c;
+    }
+  }
+  if (cell || row.length) { row.push(cell.trim()); if (row.some(Boolean)) rows.push(row); }
+  return rows;
+}
+
+function csvToObjects(rows) {
+  if (rows.length < 2) return [];
+  const headers = rows[0].map(h => h.toLowerCase().trim().replace(/\s+/g, '_'));
+  return rows.slice(1).map(r => {
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = (r[i] || '').trim(); });
+    return obj;
+  });
+}
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+const esc = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function daysUntil(ds) {
+  if (!ds) return null;
+  const d = new Date(ds);
+  return isNaN(d) ? null : Math.round((d - Date.now()) / 86400000);
+}
+
+function riskBadge(r) {
+  if (!r) return '';
+  const cls = r === 'נמוך' ? 'b-risk-low' : r === 'גבוה' ? 'b-risk-high' : 'b-risk-med';
+  return `<span class="badge ${cls}">${esc(r)}</span>`;
+}
+
+// ── Demo data ─────────────────────────────────────────────────────────────────
+const DEMO = [
+  { client_id:'fattal', project_name:'לאונרדו קלאב ים המלח',    status:'בביצוע', description:'אתר פרויקט המרכז את סטטוס העבודות, תיעוד מהשטח, לו"ז מעודכן ומסמכים רלוונטיים.', site_url:'https://sites.google.com/makomltd.com/fattal-dead-sea/', image_url:'https://fattal-cms-prod.s3.eu-central-1.amazonaws.com/2_e113a6719b.jpg', location:'ים המלח', lat:'31.2',    lng:'35.3667', planned_end_date:'2026-12-31', progress:'45', risk:'בינוני', next_step:'תיאום עם קבלן ראשי',   tags:'אתר פרויקט,מסמכים,עדכונים' },
+  { client_id:'fattal', project_name:'לאונרדו פלאזה ירושלים',   status:'בביצוע', description:'ריכוז דוחות ביצוע לפי קומות, סטטוס חדרים, צווארי בקבוק.',                            site_url:'https://sites.google.com/makomltd.com/leonardo-jerusalem-fattal/', image_url:'',          location:'ירושלים', lat:'31.7683', lng:'35.2137', planned_end_date:'2026-10-31', progress:'62', risk:'גבוה',   next_step:'בדיקת איכות שלב ג',   tags:'אתר פרויקט,מסמכים,עדכונים' },
+  { client_id:'fattal', project_name:'מלון פלטין תל אביב',      status:'בביצוע', description:'כניסה לאזור הפרויקט לצפייה בעדכונים, קבצים, תמונות, סיכומי ישיבות.',                  site_url:'https://sites.google.com/makomltd.com/fattal-palatin',              image_url:'',          location:'תל אביב',  lat:'32.0853', lng:'34.7818', planned_end_date:'2027-02-28', progress:'28', risk:'נמוך',   next_step:'התחלת שלב ב',         tags:'אתר פרויקט,מסמכים,עדכונים' }
+];
+
+// ── App state ─────────────────────────────────────────────────────────────────
+const params   = new URLSearchParams(location.search);
+const CSV_URL  = params.get('csv') || '';
+const CLIENT   = (params.get('client') || '').trim().toLowerCase();
+let projects   = [];
+let leafMap    = null;
+
+// ── Data loading ──────────────────────────────────────────────────────────────
+async function loadData() {
+  if (!CSV_URL) {
+    showBanner('⚠️ מוצגים נתוני הדגמה — הוסיפו ?csv=URL&client=ID לכתובת');
+    return DEMO;
+  }
+  try {
+    const resp = await fetch(CSV_URL);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const text = await resp.text();
+    const all  = csvToObjects(parseCSV(text));
+    return all.filter(p =>
+      (p.active || '').toUpperCase() !== 'FALSE' &&
+      (!CLIENT || (p.client_id || '').toLowerCase() === CLIENT)
+    );
+  } catch (err) {
+    console.error('CSV fetch error:', err);
+    showBanner('⚠️ שגיאה בטעינת הנתונים — בדקו את כתובת ה-CSV');
+    return [];
+  }
+}
+
+function showBanner(msg) {
+  const el = document.getElementById('demoBanner');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+// ── Card builder ──────────────────────────────────────────────────────────────
+function buildCard(p, i) {
+  const pct    = Math.min(100, Math.max(0, parseInt(p.progress) || 0));
+  const days   = daysUntil(p.planned_end_date);
+  const hasImg = /^https?:\/\//.test(p.image_url || '');
+
+  const thumb = hasImg
+    ? `<div class="card-thumb"><img src="${esc(p.image_url)}" alt="${esc(p.project_name)}" loading="lazy" onerror="this.parentElement.innerHTML='<svg class=thumb-placeholder width=52 height=52 viewBox=&quot;0 0 24 24&quot; fill=none stroke=&quot;rgba(255,255,255,.4)&quot; stroke-width=&quot;1.5&quot;><rect x=&quot;3&quot; y=&quot;3&quot; width=&quot;18&quot; height=&quot;18&quot; rx=&quot;2&quot;/><path d=&quot;M4 16l4-4 4 4 4-6 4 6&quot;/></svg>'"></div>`
+    : `<div class="card-thumb"><svg class="thumb-placeholder" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M4 16l4-4 4 4 4-6 4 6"/></svg></div>`;
+
+  let cdown = '';
+  if (days !== null) {
+    const cls = days < 0 ? 'cdown late' : 'cdown';
+    const txt = days < 0
+      ? `<b>${Math.abs(days)} ימים</b> באיחור`
+      : days === 0 ? '<b>היום!</b> — מועד סיום'
+      : `<b>${days} ימים</b> לסיום מתוכנן`;
+    cdown = `<div class="${cls}">&#x23F1; ${txt}</div>`;
+  }
+
+  return `<div class="card" onclick="openDlg(${i})">
+    ${thumb}
+    <div class="card-body">
+      <div class="badges">
+        <span class="badge b-status">${esc(p.status || '')}</span>
+        ${riskBadge(p.risk)}
+      </div>
+      <div class="card-title">${esc(p.project_name || '')}</div>
+      ${p.location ? `<div class="card-loc">&#128205; ${esc(p.location)}</div>` : ''}
+      <div>
+        <div class="prog-label"><span>התקדמות</span><span>${pct}%</span></div>
+        <div class="prog-bg"><div class="prog-fill" style="width:${pct}%"></div></div>
+      </div>
+      ${cdown}
+    </div>
+    <div class="card-foot">
+      ${p.site_url ? `<a class="btn-site" href="${esc(p.site_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">כניסה לאתר הניהול &#x2190;</a>` : ''}
+    </div>
+  </div>`;
+}
+
+// ── Dialog ────────────────────────────────────────────────────────────────────
+function openDlg(i) {
+  const p   = projects[i];
+  const pct = Math.min(100, Math.max(0, parseInt(p.progress) || 0));
+  const days = daysUntil(p.planned_end_date);
+  const hasImg = /^https?:\/\//.test(p.image_url || '');
+
+  document.getElementById('dlgTitle').textContent = p.project_name || '';
+
+  let b = '';
+  if (hasImg) b += `<img class="dlg-img" src="${esc(p.image_url)}" alt="" loading="lazy">`;
+  if (p.description) b += `<p class="dlg-desc">${esc(p.description)}</p>`;
+
+  b += '<div class="dlg-grid">';
+  if (p.status)   b += `<div class="dlg-field"><label>סטטוס</label><p><span class="badge b-status">${esc(p.status)}</span></p></div>`;
+  if (p.risk)     b += `<div class="dlg-field"><label>סיכון</label><p>${riskBadge(p.risk)}</p></div>`;
+  if (p.location) b += `<div class="dlg-field"><label>מיקום</label><p>${esc(p.location)}</p></div>`;
+  if (p.planned_end_date) b += `<div class="dlg-field"><label>סיום מתוכנן</label><p>${esc(p.planned_end_date)}</p></div>`;
+  if (days !== null) {
+    const clr = days < 0 ? 'var(--red)' : 'var(--navy)';
+    const lbl = days < 0 ? Math.abs(days) + ' ימים — באיחור' : days + ' ימים';
+    b += `<div class="dlg-field"><label>ימים נותרו</label><p style="font-weight:700;color:${clr}">${lbl}</p></div>`;
+  }
+  b += `<div class="dlg-field"><label>התקדמות</label><p>${pct}%</p></div>`;
+  b += '</div>';
+
+  if (p.next_step) b += `<div class="dlg-field" style="margin-bottom:12px"><label>הצעד הבא</label><p>${esc(p.next_step)}</p></div>`;
+  if (p.tags) {
+    const chips = p.tags.split(',').map(t =>
+      `<span class="badge" style="background:#eef0f6;color:#555;margin-left:4px;margin-bottom:4px">${esc(t.trim())}</span>`
+    ).join('');
+    b += `<div class="dlg-field" style="margin-bottom:12px"><label>תגיות</label><div style="margin-top:4px">${chips}</div></div>`;
+  }
+
+  b += '<div class="dlg-actions">';
+  if (p.site_url)    b += `<a class="btn-site" href="${esc(p.site_url)}" target="_blank" rel="noopener">כניסה לאתר הניהול &#x2190;</a>`;
+  if (p.youtube_url) b += `<a class="btn-site btn-yt" href="${esc(p.youtube_url)}" target="_blank" rel="noopener">&#x25B6; סרטון YouTube</a>`;
+  b += '</div>';
+
+  document.getElementById('dlgBody').innerHTML = b;
+  document.getElementById('overlay').classList.add('open');
+}
+
+document.getElementById('dlgClose').onclick = () => document.getElementById('overlay').classList.remove('open');
+document.getElementById('overlay').onclick = e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('open'); };
+
+// ── Map ───────────────────────────────────────────────────────────────────────
+function initMap(projs) {
+  const geo = projs.filter(p => p.lat && p.lng && !isNaN(+p.lat) && !isNaN(+p.lng));
+  if (!geo.length) return;
+
+  document.getElementById('mapWrap').style.display = 'block';
+  if (leafMap) { leafMap.remove(); leafMap = null; }
+
+  const avgLat = geo.reduce((s, p) => s + +p.lat, 0) / geo.length;
+  const avgLng = geo.reduce((s, p) => s + +p.lng, 0) / geo.length;
+
+  leafMap = L.map('map').setView([avgLat, avgLng], 8);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&#169; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(leafMap);
+
+  geo.forEach(p => {
+    const m = L.marker([+p.lat, +p.lng]).addTo(leafMap);
+    m.bindPopup(`<strong>${esc(p.project_name)}</strong><br>${esc(p.location || '')}<br>${parseInt(p.progress) || 0}%`);
+    m.on('click', () => openDlg(projects.indexOf(p)));
+  });
+
+  if (geo.length > 1) {
+    leafMap.fitBounds(geo.map(p => [+p.lat, +p.lng]), { padding: [40, 40] });
+  }
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+async function render() {
+  document.getElementById('loadingEl').style.display  = 'block';
+  document.getElementById('cardsWrap').style.display  = 'none';
+  document.getElementById('statsBar').style.display   = 'none';
+  document.getElementById('emptyEl').style.display    = 'none';
+  document.getElementById('mapWrap').style.display    = 'none';
+
+  projects = await loadData();
+
+  document.getElementById('loadingEl').style.display = 'none';
+
+  const ts = new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('hdrTs').textContent    = 'עדכון: ' + ts;
+  document.getElementById('footerTs').textContent = 'עדכון אחרון: ' + ts;
+
+  if (!projects.length) {
+    document.getElementById('emptyEl').style.display = 'block';
+    return;
+  }
+
+  const clientLabel = CLIENT || (projects[0] && projects[0].client_id) || '';
+  if (clientLabel) document.getElementById('hdrClient').textContent = 'פרויקטים — ' + clientLabel;
+
+  const avgProg  = Math.round(projects.reduce((s, p) => s + (parseInt(p.progress) || 0), 0) / projects.length);
+  const highRisk = projects.filter(p => p.risk === 'גבוה').length;
+  document.getElementById('statsBar').innerHTML =
+    `<div class="stat-chip"><strong>${projects.length}</strong> פרויקטים פעילים</div>` +
+    `<div class="stat-chip">התקדמות ממוצעת <strong>${avgProg}%</strong></div>` +
+    (highRisk ? `<div class="stat-chip" style="border-right:3px solid var(--red)"><strong>${highRisk}</strong> סיכון גבוה</div>` : '');
+  document.getElementById('statsBar').style.display = 'flex';
+
+  document.getElementById('cardsGrid').innerHTML = projects.map(buildCard).join('');
+  document.getElementById('cardsWrap').style.display = 'block';
+
+  initMap(projects);
+}
+
+render();
+setInterval(render, 5 * 60 * 1000);
+</script>
+</body>
+</html>
