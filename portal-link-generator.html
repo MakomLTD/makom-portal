@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>מחולל קישורים | פורטל MAKOM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --navy:#11193F; --yellow:#FCB127; --green:#2FB66D;
+      --red:#E05A47; --bg:#F4F6FA; --line:#E3E7EF; --card:#fff;
+      --muted:#6B7280; --ink:#27314D;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Noto Sans Hebrew','Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--navy);min-height:100vh}
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:1200px;margin:0 auto;padding:32px 24px 80px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;gap:16px;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:900;font-size:17px}
+    .brand-box{background:var(--navy);border-radius:14px;padding:8px 14px}
+    svg.logo{width:110px;height:auto;display:block}
+    .logo-w{fill:#fff}.logo-y{fill:var(--yellow)}
+    h1{font-size:clamp(26px,3.5vw,40px);font-weight:900;margin-bottom:6px}
+    .subtitle{color:var(--muted);font-size:16px;margin-bottom:32px}
+    .main-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+    @media(max-width:780px){.main-grid{grid-template-columns:1fr}}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:28px;box-shadow:0 12px 36px rgba(17,25,63,.08)}
+    .card h2{font-size:20px;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+    .card h2 span{font-size:22px}
+    label{display:block;font-size:13px;font-weight:800;color:#4A556D;margin-bottom:5px}
+    input,select,textarea{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:10px 14px;font-size:14px;font-family:inherit;color:var(--ink);background:#FAFBFD;outline:none;transition:.2s}
+    input:focus,select:focus,textarea:focus{border-color:#5B8AF0;background:#fff}
+    textarea{resize:vertical;min-height:80px;direction:ltr;text-align:left;font-size:13px}
+    .field{margin-bottom:16px}
+    .hint{font-size:12px;color:var(--muted);margin-top:4px}
+    .btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:14px;padding:12px 20px;font-family:inherit;font-weight:900;font-size:14px;cursor:pointer;transition:.2s}
+    .btn-navy{background:var(--navy);color:#fff}.btn-navy:hover{filter:brightness(1.12)}
+    .btn-yellow{background:var(--yellow);color:var(--navy)}.btn-yellow:hover{filter:brightness(.96)}
+    .btn-green{background:var(--green);color:#fff}.btn-green:hover{filter:brightness(.95)}
+    .btn-ghost{background:#F0F3FA;color:var(--navy)}.btn-ghost:hover{background:#E4E9F5}
+    .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    .full{width:100%;justify-content:center}
+    .table-wrap{overflow-x:auto;margin-top:8px}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th{background:var(--navy);color:#fff;padding:10px 12px;text-align:right;font-weight:800;white-space:nowrap}
+    th:first-child{border-radius:10px 0 0 10px}th:last-child{border-radius:0 10px 10px 0}
+    td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+    tr:hover td{background:#F7F9FF}tr:last-child td{border-bottom:0}
+    .badge{display:inline-flex;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:800}
+    .badge-blue{background:#EEF2FF;color:#3B5FD6}
+    .copy-btn{border:1px solid var(--line);background:#F7F9FC;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink);transition:.15s}
+    .copy-btn:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+    .copy-btn.copied{background:var(--green);color:#fff;border-color:var(--green)}
+    .del-btn{border:0;background:none;font-size:18px;cursor:pointer;color:#B0B8CC;line-height:1}
+    .del-btn:hover{color:var(--red)}
+    .output-box{background:#F0F4FF;border:1.5px solid #C4D2F5;border-radius:14px;padding:16px;margin-top:16px;display:none}
+    .output-box.visible{display:block}
+    .output-label{font-size:11px;font-weight:900;color:#4A63B0;margin-bottom:8px}
+    .output-code{background:#fff;border:1px solid #D8E0F5;border-radius:10px;padding:12px;font-size:12px;font-family:'Courier New',monospace;direction:ltr;text-align:left;word-break:break-all;white-space:pre-wrap;color:#1a2a6c;max-height:140px;overflow:auto}
+    .pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;transition:.2s}
+    .pill:hover{background:#F0F4FF;border-color:#98B0EE}
+    .notice{background:#FFF7E2;border:1px solid rgba(252,177,39,.5);border-radius:14px;padding:14px 16px;font-size:13px;color:#5E4118;margin-bottom:24px}
+    .notice strong{display:block;margin-bottom:4px;font-size:14px}
+    .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;border-radius:999px;padding:12px 24px;font-weight:800;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.18);opacity:0;transition:opacity .3s;pointer-events:none;z-index:9999}
+    .toast.show{opacity:1}
+    .section-title{font-size:18px;font-weight:900;margin:28px 0 14px;color:var(--navy)}
+    .step{display:flex;gap:14px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--line)}
+    .step:last-child{border-bottom:0;padding-bottom:0}
+    .step-num{min-width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+    .step-body{flex:1;min-width:0}
+    .step-title{font-weight:800;font-size:14px;margin-bottom:4px}
+    .step-desc{font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:8px}
+    .step-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .sbtn{border:1.5px solid var(--line);background:#F7F9FC;border-radius:10px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink);transition:.15s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+    .sbtn:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+    .sbtn.copied{background:var(--green);color:#fff;border-color:var(--green)}
+    .sbtn-primary{background:var(--yellow);color:var(--navy);border-color:var(--yellow)}
+    .sbtn-primary:hover{filter:brightness(.92);color:var(--navy)}
+    .alt-box{background:#EEF8F3;border:1.5px solid #A8DCBE;border-radius:18px;padding:22px 24px;margin-top:24px}
+    .alt-box h3{color:#1A6B42;font-size:16px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+    .alt-box p{font-size:13px;color:#2C5C3E;line-height:1.7;margin-bottom:10px}
+    .alt-box code{background:#D1F0E0;padding:2px 7px;border-radius:6px;font-size:12px}
+    .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+    @media(max-width:600px){.compare-grid{grid-template-columns:1fr}}
+    .compare-col{border-radius:12px;padding:14px}
+    .compare-col.cur{background:#E8EEFF;border:1px solid #B0C0F0}
+    .compare-col.alt{background:#E8FFF2;border:1px solid #90D8AF}
+    .compare-col h4{font-size:13px;font-weight:900;margin-bottom:8px}
+    .compare-col ul{font-size:12px;color:#3A4560;padding-right:18px;line-height:1.8}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-box">
+        <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 413.82 146.01">
+          <polygon class="logo-y" points="100.11 116.51 127.29 146.01 154.47 116.51 154.47 79.1 100.11 79.1 100.11 116.51"/>
+          <path class="logo-w" d="m67.2,79.1V20.18l-23.92,58.92h-5.83L13.65,20.18v58.92H0V1.28h19.25l21.12,52.38L61.6,1.28h19.25v77.82h-13.65Z"/>
+          <path class="logo-w" d="m222.48,79.1l-26.13-32.78-6.77,7.93v24.85h-13.65V1.28h13.65v37.1L220.03,1.28h16.92l-31.62,36.75,33.95,41.07h-16.8Z"/>
+          <path class="logo-w" d="m280,0c23.33,0,39.78,17.03,39.78,40.25s-16.45,40.25-39.78,40.25-39.78-17.03-39.78-40.25S256.67,0,280,0Zm0,12.13c-15.75,0-25.78,12.02-25.78,28.12s10.03,28.12,25.78,28.12,25.78-12.13,25.78-28.12-10.15-28.12-25.78-28.12Z"/>
+          <path class="logo-w" d="m400.17,79.1V20.18l-23.92,58.92h-5.83l-23.8-58.92v58.92h-13.65V1.28h19.25l21.12,52.38L394.57,1.28h19.25v77.82h-13.65Z"/>
+          <path class="logo-w" d="m136.51,1.28h-17.03l-30.57,77.82h14.94s18.29,0,18.29,0v12.35h11.71v-12.35h33.23S136.51,1.28,136.51,1.28Zm-28.05,65.13l19.53-53.58,19.53,53.58h-39.06Z"/>
+        </svg>
+      </div>
+      <span>מחולל קישורי פורטל</span>
+    </div>
+    <button class="pill" onclick="exportCSV()">⬇ ייצוא לCSV</button>
+  </div>
+
+  <h1>מחולל קישורי לקוחות</h1>
+  <p class="subtitle">הגדרה → ניהול לקוחות → שליחה — הכל ממסך אחד</p>
+
+  <div class="notice">
+    <strong>⚙️ הגדרת כתובת Apps Script (לאחר השלמת שלב 5)</strong>
+    לאחר פריסת Apps Script → העתיקו את ה-URL והדביקו כאן פעם אחת.
+    <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap">
+      <input type="url" id="globalScriptUrl" placeholder="https://script.google.com/macros/s/AKf…/exec"
+             style="flex:1;min-width:280px" oninput="saveScriptUrl()">
+      <button class="btn btn-navy" onclick="testScriptUrl()">🔗 בדיקת חיבור</button>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div class="card">
+      <h2><span>➕</span> הוספת לקוח/פרויקט</h2>
+      <div class="field"><label>שם הלקוח (לתצוגה)</label><input type="text" id="fClientName" placeholder="פתאל, אמריקן אינדסטריז..."></div>
+      <div class="field"><label>מזהה לקוח (client_id בגיליון)</label><input type="text" id="fClientId" placeholder="fattal, amind..." dir="ltr" oninput="slugify(this)"><div class="hint">אותיות קטנות בלבד, ללא רווחים — חייב להתאים לגיליון</div></div>
+      <div class="field"><label>טוקן גישה (token בגיליון)</label><input type="text" id="fToken" dir="ltr" placeholder="abc123"><button class="btn btn-ghost" style="margin-top:6px;padding:6px 12px;font-size:12px" onclick="genToken()">🎲 צור טוקן אקראי</button></div>
+      <div class="field"><label>גובה ה-iframe ב-Google Sites (פיקסל)</label><input type="number" id="fHeight" value="920" min="400" max="2000"></div>
+      <button class="btn btn-yellow full" onclick="addClient()">הוסף לקוח ⟵</button>
+      <div class="output-box" id="previewBox">
+        <div class="output-label">🔗 קישור ישיר לפורטל</div>
+        <div class="output-code" id="previewLink"></div>
+        <div class="output-label" style="margin-top:12px">📋 קוד הטמעה ל-Google Sites</div>
+        <div class="output-code" id="previewEmbed"></div>
+        <div class="btn-row">
+          <button class="btn btn-navy" onclick="copyText('previewLink')">העתק לינק</button>
+          <button class="btn btn-green" onclick="copyText('previewEmbed')">העתק Embed</button>
+          <a id="previewOpen" href="#" target="_blank" rel="noopener" class="btn btn-ghost">פתח בדפדפן ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span>🚀</span> הגדרה ראשונית — 5 שלבים</h2>
+      <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">פתח Apps Script חדש</div><div class="step-desc">היכנס ל-Apps Script עם חשבון Google → לחץ "New project"</div><div class="step-actions"><a href="https://script.google.com" target="_blank" rel="noopener" class="sbtn sbtn-primary">🔗 פתח script.google.com ↗</a></div></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">הדבק את Code.gs</div><div class="step-desc">מחק את הקוד הקיים → הדבק → שמור (Ctrl+S).</div><div class="step-actions"><button class="sbtn sbtn-primary" id="copyCodeBtn" onclick="copyCodeGs(this)">📋 העתק Code.gs</button><a href="https://raw.githubusercontent.com/MakomLTD/makom-portal/main/Code.gs" target="_blank" rel="noopener" class="sbtn">👁 צפה בקוד ↗</a></div></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">הוסף קובץ index.html</div><div class="step-desc">ב-Apps Script: ➕ → HTML → שם: <strong>index</strong> (חובה!) → מחק הכל → הדבק.</div><div class="step-actions"><button class="sbtn sbtn-primary" id="copyHtmlBtn" onclick="copyIndexHtml(this)">📋 העתק index.html</button></div></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><div class="step-title">הפעל fullSetup() — יוצר הכל</div><div class="step-desc">בחר <code style="background:#F0F4FF;padding:2px 7px;border-radius:6px;font-size:12px">fullSetup</code> מהרשימה → לחץ ▶ Run → אשר הרשאות. בלוג תראה ✅ + URL של ה-Sheet.</div></div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><div class="step-title">פרסם ← הדבק את ה-URL למעלה</div><div class="step-desc">Deploy → New Deployment → Web App<br>• Execute as: <strong>Me</strong><br>• Who has access: <strong>Anyone</strong><br>→ Deploy → העתק URL → הדבק בשדה למעלה.</div><div class="step-actions"><button class="sbtn" onclick="document.getElementById('globalScriptUrl').focus();showToast('📌 הדבק את ה-URL בשדה למעלה')">📌 עבור לשדה URL</button></div></div></div>
+    </div>
+  </div>
+
+  <div class="alt-box">
+    <h3>💡 יש דרך פשוטה יותר — ללא Apps Script</h3>
+    <p>כל הסטאק הנוכחי חינמי לחלוטין. אם רוצה מינימום תחזוקה — יש חלופה: <strong>Google Sheet מפורסם כ-CSV</strong>.</p>
+    <div class="compare-grid">
+      <div class="compare-col cur"><h4>🔵 שיטה נוכחית (Apps Script)</h4><ul><li>✅ אבטחה מלאה (token)</li><li>✅ פורטל HTML מעוצב</li><li>✅ רענון חי כל 5 דקות</li><li>✅ פילטור לפי לקוח</li><li>⚠️ דורש Deploy חד-פעמי</li></ul></div>
+      <div class="compare-col alt"><h4>🟢 חלופה פשוטה (CSV ציבורי)</h4><ul><li>✅ אפס קוד לפרוס</li><li>✅ עדכון מיידי — ערוך Sheet → נראה</li><li>✅ אין Deploy אף פעם</li><li>⚠️ כל מי שיש לו URL רואה הכל</li><li>⚠️ אין token / פילטור</li></ul></div>
+    </div>
+  </div>
+
+  <div class="section-title">📋 לקוחות — ניהול ושליחה</div>
+  <div class="card">
+    <div class="table-wrap">
+      <table id="clientsTable">
+        <thead><tr><th>שם לקוח</th><th>client_id</th><th>Token</th><th>סטטוס</th><th>קישור ישיר</th><th>Embed</th><th>שלח ללקוח</th><th></th></tr></thead>
+        <tbody id="clientsBody"><tr id="emptyRow"><td colspan="8" style="text-align:center;color:var(--muted);padding:28px">עדיין לא נוספו לקוחות.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="sendModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:22px;padding:32px;max-width:560px;width:90%;box-shadow:0 24px 64px rgba(0,0,0,.25);position:relative">
+      <button onclick="closeSendModal()" style="position:absolute;top:16px;left:16px;border:0;background:none;font-size:22px;cursor:pointer;color:#888">×</button>
+      <h2 style="font-size:20px;margin-bottom:6px">📤 שלח פורטל ללקוח</h2>
+      <p id="sendClientName" style="color:var(--muted);font-size:13px;margin-bottom:18px"></p>
+      <div class="field"><label>הודעה מוכנה לשליחה (WhatsApp / אימייל)</label><textarea id="sendMsg" style="min-height:160px;direction:rtl;text-align:right;font-size:13px;line-height:1.7"></textarea></div>
+      <div class="btn-row" style="margin-top:0">
+        <button class="btn btn-green" onclick="sendWhatsApp()">💬 פתח WhatsApp Web</button>
+        <button class="btn btn-navy" onclick="sendEmail()">📧 פתח אימייל</button>
+        <button class="btn btn-ghost" onclick="copySendMsg()">📋 העתק הודעה</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+  const REPO_RAW = 'https://raw.githubusercontent.com/MakomLTD/makom-portal/main';
+  let clients = JSON.parse(localStorage.getItem('makom_clients') || '[]');
+  let scriptUrl = localStorage.getItem('makom_script_url') || '';
+  if (!clients.length) { clients = [{ name: 'פתאל (דמה)', clientId: 'fattal', token: 'abc123', height: 920 }]; localStorage.setItem('makom_clients', JSON.stringify(clients)); }
+  document.addEventListener('DOMContentLoaded', () => { if(scriptUrl) document.getElementById('globalScriptUrl').value = scriptUrl; renderTable(); updatePreview(); });
+  function saveScriptUrl(){ scriptUrl = document.getElementById('globalScriptUrl').value.trim(); localStorage.setItem('makom_script_url', scriptUrl); renderTable(); updatePreview(); }
+  async function testScriptUrl(){ if(!scriptUrl){ showToast('⚠️ הדביקו תחילה את כתובת Apps Script'); return; } window.open(scriptUrl + '?test=1', '_blank', 'noopener,noreferrer'); showToast('✅ פתחתי בדפדפן!'); }
+  function slugify(el){ el.value = el.value.toLowerCase().replace(/[^a-z0-9_\-]/g, ''); }
+  function genToken(){ const c='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'; let t=''; for(let i=0;i<10;i++) t+=c[Math.floor(Math.random()*c.length)]; document.getElementById('fToken').value=t; updatePreview(); }
+  function buildLink(cid,tok){ if(!scriptUrl||!cid) return ''; return scriptUrl+'?client='+encodeURIComponent(cid)+(tok?'&token='+encodeURIComponent(tok):''); }
+  function buildEmbed(link,h){ if(!link) return ''; return `<iframe src="${link}" width="100%" height="${h||920}" frameborder="0" style="border:none;border-radius:18px" loading="lazy"></iframe>`; }
+  function updatePreview(){ const cid=document.getElementById('fClientId').value.trim(),tok=document.getElementById('fToken').value.trim(),h=document.getElementById('fHeight').value||920,box=document.getElementById('previewBox'); if(!scriptUrl||!cid){box.classList.remove('visible');return;} const link=buildLink(cid,tok),embed=buildEmbed(link,h); document.getElementById('previewLink').textContent=link; document.getElementById('previewEmbed').textContent=embed; document.getElementById('previewOpen').href=link; box.classList.add('visible'); }
+  ['fClientId','fToken','fHeight'].forEach(id=>document.getElementById(id).addEventListener('input',updatePreview));
+  function addClient(){ const name=document.getElementById('fClientName').value.trim(),cid=document.getElementById('fClientId').value.trim(),tok=document.getElementById('fToken').value.trim(),h=document.getElementById('fHeight').value||920; if(!name){showToast('⚠️ מלאו שם לקוח');return;} if(!cid){showToast('⚠️ מלאו מזהה לקוח');return;} if(!tok){showToast('⚠️ מלאו טוקן גישה');return;} const ex=clients.findIndex(c=>c.clientId===cid); if(ex>=0){clients[ex]={name,clientId:cid,token:tok,height:h};showToast('✅ עודכן');}else{clients.push({name,clientId:cid,token:tok,height:h});showToast('✅ נוסף');} save();renderTable(); document.getElementById('fClientName').value='';document.getElementById('fClientId').value='';document.getElementById('fToken').value='';document.getElementById('previewBox').classList.remove('visible'); }
+  function deleteClient(i){ if(!confirm('למחוק?')) return; clients.splice(i,1);save();renderTable(); }
+  function save(){ localStorage.setItem('makom_clients',JSON.stringify(clients)); }
+  function renderTable(){ const tbody=document.getElementById('clientsBody'),empty=document.getElementById('emptyRow'); if(!clients.length){tbody.innerHTML='';tbody.appendChild(empty);return;} tbody.innerHTML=clients.map((c,i)=>{const link=buildLink(c.clientId,c.token),embed=buildEmbed(link,c.height),ready=!!link;return`<tr><td><strong>${esc(c.name)}</strong></td><td><span class="badge badge-blue">${esc(c.clientId)}</span></td><td><code style="font-size:12px">${esc(c.token)}</code></td><td><span style="font-size:12px;font-weight:700;color:${ready?'var(--green)':'var(--muted)'}">${ready?'✅ מוכן':'⏳ ממתין ל-URL'}</span></td><td>${link?`<a href="${esc(link)}" target="_blank" rel="noopener" style="font-size:12px;color:#3967E8;text-decoration:underline">${esc(c.clientId)} ↗</a>`:'<span style="color:var(--muted);font-size:12px">—</span>'}</td><td>${link?`<button class="copy-btn" onclick="copyRaw(\`${esc(embed)}\`,this)">העתק Embed</button>`:'—'}</td><td>${ready?`<button class="btn btn-yellow" style="padding:7px 14px;font-size:12px" onclick="openSendModal(${i})">📤 שלח</button>`:'<span style="color:var(--muted);font-size:12px">—</span>'}</td><td><button class="del-btn" onclick="deleteClient(${i})" title="מחיקה">×</button></td></tr>`;}).join(''); }
+  function copyText(id){ navigator.clipboard.writeText(document.getElementById(id).textContent.trim()).then(()=>showToast('📋 הועתק!')); }
+  function copyRaw(text,btn){ navigator.clipboard.writeText(text).then(()=>{btn.textContent='✅ הועתק!';btn.classList.add('copied');setTimeout(()=>{btn.textContent='העתק Embed';btn.classList.remove('copied');},2000);}); }
+  function esc(str){ return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function exportCSV(){ if(!clients.length){showToast('⚠️ אין לקוחות');return;} const rows=[['שם לקוח','client_id','token','גובה iframe','קישור ישיר'],...clients.map(c=>[c.name,c.clientId,c.token,c.height,buildLink(c.clientId,c.token)])]; const csv='\uFEFF'+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n'); const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='makom-portal-clients.csv';a.click();showToast('⬇ CSV יורד...'); }
+  async function copyCodeGs(btn){ btn.textContent='⏳ טוען...'; try{ const r=await fetch(REPO_RAW+'/Code.gs'); if(!r.ok) throw new Error(r.status); await navigator.clipboard.writeText(await r.text()); btn.textContent='✅ הועתק!';btn.classList.add('copied');showToast('✅ Code.gs הועתק!');setTimeout(()=>{btn.textContent='📋 העתק Code.gs';btn.classList.remove('copied');},3000); }catch(e){btn.textContent='📋 העתק Code.gs';window.open(REPO_RAW+'/Code.gs','_blank');showToast('⚠️ פתחתי בדפדפן — Ctrl+A → Ctrl+C');} }
+  async function copyIndexHtml(btn){ btn.textContent='⏳ טוען...'; try{ const r=await fetch(REPO_RAW+'/google-sites-apps-script-index.html'); if(!r.ok) throw new Error(r.status); await navigator.clipboard.writeText(await r.text()); btn.textContent='✅ הועתק!';btn.classList.add('copied');showToast('✅ index.html הועתק!');setTimeout(()=>{btn.textContent='📋 העתק index.html';btn.classList.remove('copied');},3000); }catch(e){btn.textContent='📋 העתק index.html';window.open(REPO_RAW+'/google-sites-apps-script-index.html','_blank');showToast('⚠️ פתחתי בדפדפן — Ctrl+A → Ctrl+C');} }
+  let _sendIdx=-1;
+  function openSendModal(i){ _sendIdx=i; const c=clients[i],link=buildLink(c.clientId,c.token); document.getElementById('sendClientName').textContent='לקוח: '+c.name; document.getElementById('sendMsg').value=`שלום,\n\nמצורף הקישור לפורטל הפרויקטים שלכם:\n\n🔗 ${link}\n\nהפורטל מתעדכן אוטומטית.\nצוות MAKOM`; document.getElementById('sendModal').style.display='flex'; }
+  function closeSendModal(){ document.getElementById('sendModal').style.display='none'; }
+  function sendWhatsApp(){ window.open('https://web.whatsapp.com/send?text='+encodeURIComponent(document.getElementById('sendMsg').value),'_blank','noopener'); }
+  function sendEmail(){ const c=clients[_sendIdx]||{}; window.open('mailto:?subject='+encodeURIComponent('פורטל פרויקטים — '+c.name)+'&body='+encodeURIComponent(document.getElementById('sendMsg').value)); }
+  function copySendMsg(){ navigator.clipboard.writeText(document.getElementById('sendMsg').value).then(()=>showToast('📋 הודעה הועתקה!')); }
+  let _tt; function showToast(msg){ const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),2400); }
+</script>
+</body>
+</html>
